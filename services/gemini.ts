@@ -138,13 +138,13 @@ export const renderGarment = async (
     };
   }
 
+  // Fix: Removed 'imageSize: "1K"' as it is only supported for gemini-3-pro-image-preview
   const response = await ai.models.generateContent({
     model: ModelType.GEMINI_IMAGE,
     contents,
     config: { 
       imageConfig: { 
-        aspectRatio: "9:16",
-        imageSize: "1K" 
+        aspectRatio: "9:16"
       } 
     }
   });

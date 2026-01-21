@@ -31,7 +31,6 @@ const INITIAL_GARMENT_CONFIG: GarmentConfig = {
 
 const SYSTEM_PROMPT = `You are Arslan Wazir, a world-class luxury fashion design engineer.
 CORE MISSION: Manage couture garment state with precision.
-CRITICAL RULE: DESIGN CONTINUITY. Preserve attributes when modifying one.
 JSON OUTPUT: Provide explanation then COMPLETE updated state in JSON.
 {
   "kernel_state": "ACTIVE",
@@ -105,7 +104,7 @@ const renderGarment = async (fabricBase64: string, config: GarmentConfig): Promi
   const response = await ai.models.generateContent({
     model: ModelType.GEMINI_IMAGE,
     contents: { parts },
-    config: { imageConfig: { aspectRatio: "9:16", imageSize: "1K" } }
+    config: { imageConfig: { aspectRatio: "9:16" } }
   });
 
   const imgPart = response.candidates?.[0]?.content?.parts.find(p => p.inlineData);
@@ -113,7 +112,87 @@ const renderGarment = async (fabricBase64: string, config: GarmentConfig): Promi
   throw new Error("Synthesis disrupted.");
 };
 
-// --- 4. SHARED COMPONENTS ---
+// --- 4. COMPONENTS ---
+
+const SewingSignature = () => {
+  // Enhanced cursive path for "Arslan Wazir"
+  const cursivePath = "M30,50 C40,25 55,20 60,45 C60,55 65,55 70,45 C75,35 80,35 85,45 C90,55 95,45 100,45 C105,45 110,35 115,45 L125,45 M145,20 L145,60 M145,45 C155,30 165,30 175,45 C185,60 195,60 205,45 C215,30 220,30 225,45 C230,60 235,45 240,45";
+
+  return (
+    <div className="relative flex flex-col items-center justify-center w-full max-w-sm h-32 -mt-4">
+      {/* Animation Layer */}
+      <svg width="280" height="100" viewBox="0 0 280 100" className="overflow-visible pointer-events-none absolute z-10">
+        <defs>
+          <filter id="stitch-glow-red">
+            <feGaussianBlur stdDeviation="1.2" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
+        </defs>
+        
+        {/* The Stitched Red Thread - Fades out after 4.5s */}
+        <path
+          d={cursivePath}
+          fill="none"
+          stroke="#FF3366"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeDasharray="700"
+          strokeDashoffset="700"
+          className="animate-[sew-and-fade_5s_linear_forwards]"
+          filter="url(#stitch-glow-red)"
+        />
+
+        {/* The Blue Needle - Exits after 4.6s */}
+        <g className="animate-[needle-exit_4.7s_linear_forwards]">
+          <path
+            d="M-5,-25 L0,5 L5,-25"
+            fill="none"
+            stroke="#3b82f6"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+          />
+          <circle cx="0" cy="-18" r="1.8" fill="white" stroke="#3b82f6" strokeWidth="0.8" />
+          <path d="M0,-18 Q5,-35 15,-40" stroke="#FF3366" strokeWidth="1.2" fill="none" />
+          
+          <animateMotion
+            dur="4.5s"
+            repeatCount="1"
+            fill="freeze"
+            path={cursivePath}
+          />
+        </g>
+      </svg>
+      
+      {/* Result Layer - Fades in as thread fades out */}
+      <div className="flex flex-col items-center justify-center opacity-0 animate-[reveal-clean_1s_ease-out_4.3s_forwards] relative z-20">
+        <span className="handwritten text-[36px] text-[#1a1a1a] drop-shadow-sm select-none h-14 leading-none">Arslan Wazir</span>
+        <div className="flex items-center gap-3 mt-2">
+          <div className="h-[0.5px] w-8 bg-rose-100/50"></div>
+          <span className="text-[7px] mono uppercase tracking-[0.5em] text-[#FF3366] font-black">Principal Fashion Engineer</span>
+          <div className="h-[0.5px] w-8 bg-rose-100/50"></div>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes sew-and-fade {
+          0% { stroke-dashoffset: 700; opacity: 0.6; }
+          85% { stroke-dashoffset: 0; opacity: 0.6; }
+          95% { stroke-dashoffset: 0; opacity: 0.6; }
+          100% { stroke-dashoffset: 0; opacity: 0; }
+        }
+        @keyframes needle-exit {
+          0% { opacity: 1; transform: scale(1); }
+          96% { opacity: 1; transform: scale(1); }
+          100% { opacity: 0; transform: translateY(-30px) scale(0.5); }
+        }
+        @keyframes reveal-clean {
+          from { opacity: 0; transform: translateY(4px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+    </div>
+  );
+};
 
 const Logo = ({ className = "w-10 h-10" }: { className?: string }) => (
   <div className={`${className} relative group`}>
@@ -137,7 +216,6 @@ const Logo = ({ className = "w-10 h-10" }: { className?: string }) => (
       <path d="M75 20 L75 85" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round" />
       <path d="M45 45 C 60 45, 90 35, 75 28 C 60 20, 50 60, 75 80 C 90 90, 100 70, 95 60" stroke="url(#thread-gradient)" strokeWidth="2.5" strokeLinecap="round" fill="none" className="animate-[draw_4s_ease-in-out_infinite]" style={{ strokeDasharray: '200', strokeDashoffset: '0' }} />
     </svg>
-    <style>{`@keyframes draw { 0% { stroke-dashoffset: 200; } 50% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -200; } }`}</style>
   </div>
 );
 
@@ -152,7 +230,6 @@ const StitchingWaitingAnimation = ({ pulse = false }: { pulse?: boolean }) => (
       </defs>
       <path d="M70 25 L95 25 L115 45 L105 55 L105 115 L35 115 L35 55 L25 45 L45 25 Z" stroke="url(#rainbow-stitch)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="animate-[draw-boundary_4s_linear_infinite]" style={{ strokeDasharray: '450', strokeDashoffset: '450' }} />
     </svg>
-    <style>{`@keyframes draw-boundary { 0% { stroke-dashoffset: 450; } 45% { stroke-dashoffset: 0; } 55% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -450; } }`}</style>
   </div>
 );
 
@@ -183,10 +260,7 @@ const CameraCapture = ({ onCapture, onClose }: { onCapture: (b64: string) => voi
   useEffect(() => {
     navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then(s => {
       if (videoRef.current) videoRef.current.srcObject = s;
-    }).catch(e => {
-        console.error("Camera error:", e);
-        onClose();
-    });
+    }).catch(e => onClose());
   }, []);
 
   const take = () => {
@@ -220,47 +294,6 @@ const CameraCapture = ({ onCapture, onClose }: { onCapture: (b64: string) => voi
         <button onClick={onClose} className="text-white/60 uppercase text-[10px] font-bold">Cancel</button>
       </div>
       <canvas ref={canvasRef} className="hidden" />
-    </div>
-  );
-};
-
-const FabricInspector = ({ image, onClose }: { image: string, onClose: () => void }) => {
-  const [zoom, setZoom] = useState(1);
-  const [rotate, setRotate] = useState(0);
-  return (
-    <div className="fixed inset-0 z-[250] bg-white flex flex-col">
-      <header className="p-6 border-b flex justify-between items-center bg-white">
-        <button onClick={onClose} className="text-[#FF3366] font-bold uppercase text-[10px] bg-rose-50 px-4 py-2 rounded-full">Back</button>
-        <div className="flex gap-2">
-          <button onClick={() => setZoom(z => Math.min(z + 0.5, 4))} className="w-10 h-10 bg-rose-50 text-[#FF3366] rounded-xl font-bold">+</button>
-          <button onClick={() => setZoom(z => Math.max(z - 0.5, 0.5))} className="w-10 h-10 bg-rose-50 text-[#FF3366] rounded-xl font-bold">-</button>
-          <button onClick={() => setRotate(r => r + 90)} className="w-10 h-10 bg-rose-50 text-[#FF3366] rounded-xl font-bold">⟳</button>
-        </div>
-      </header>
-      <div className="flex-1 flex items-center justify-center overflow-hidden bg-[#FFF9FA] p-8">
-        <img src={image} style={{ transform: `scale(${zoom}) rotate(${rotate}deg)`, transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }} className="max-w-full max-h-full shadow-2xl rounded-2xl border-[10px] border-white" />
-      </div>
-    </div>
-  );
-};
-
-const ClientForm = ({ onSubmit, onSkip, initialMode }: { onSubmit: (d: any) => void, onSkip: () => void, initialMode: string }) => {
-  const [details, setDetails] = useState({ name: '', notes: '', priority: 'Standard', silhouetteMode: initialMode });
-  return (
-    <div className="fixed inset-0 z-[150] bg-black/40 flex items-center justify-center p-6 backdrop-blur-md">
-      <div className="bg-white rounded-[2.5rem] w-full max-w-md p-8 shadow-2xl animate-in zoom-in duration-300">
-        <h2 className="text-[12px] font-black uppercase tracking-widest mb-6 serif italic text-gray-800">Atelier Manifest</h2>
-        <div className="space-y-6">
-          <div className="grid grid-cols-2 gap-2">
-            <div className={`p-4 rounded-2xl border-2 text-[10px] font-bold uppercase text-center ${details.silhouetteMode === 'Stock' ? 'border-[#FF3366] bg-rose-50' : 'border-rose-50 opacity-50'}`}>Model Portfolio</div>
-            <div className={`p-4 rounded-2xl border-2 text-[10px] font-bold uppercase text-center ${details.silhouetteMode === 'Personal' ? 'border-[#FF3366] bg-rose-50' : 'border-rose-50 opacity-50'}`}>Private Profile</div>
-          </div>
-          <input type="text" placeholder="Client ID / Ref" className="w-full bg-rose-50/30 p-4 rounded-xl text-xs outline-none focus:ring-2 focus:ring-[#FF3366]/20 transition-all" onChange={e => setDetails({...details, name: e.target.value})} />
-          <textarea placeholder="Deep Mapping Design Notes..." className="w-full bg-rose-50/30 p-4 rounded-xl text-xs h-24 outline-none resize-none" onChange={e => setDetails({...details, notes: e.target.value})} />
-          <button onClick={() => onSubmit(details)} className="w-full py-5 bg-[#FF3366] text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] shadow-lg active:scale-95 transition-all">Start Synthesis</button>
-          <button onClick={onSkip} className="w-full text-rose-300 text-[10px] uppercase font-bold text-center">Bypass Manifest</button>
-        </div>
-      </div>
     </div>
   );
 };
@@ -337,18 +370,18 @@ const App = () => {
   };
 
   if (wizard === 'HOME') return (
-    <div className="flex flex-col h-full items-center justify-center p-8 bg-[#FFF9FA] gap-12">
-      <div className="text-center flex flex-col items-center">
-        <Logo className="w-24 h-24 mb-6" />
-        <h1 className="text-3xl font-black stitch-lab-signature">STITCH LAB Ai</h1>
-        <p className="text-[10px] mono uppercase tracking-[0.4em] text-gray-400">Atelier Design Suite</p>
+    <div className="flex flex-col h-full items-center justify-center p-8 bg-[#FFF9FA] gap-2 overflow-hidden">
+      <div className="text-center flex flex-col items-center w-full">
+        <Logo className="w-16 h-16 mb-2" />
+        <h1 className="text-3xl font-black stitch-lab-signature mb-2">STITCH LAB Ai</h1>
+        <SewingSignature />
       </div>
-      <div className="w-full max-w-xs space-y-4">
-        <button onClick={() => { setActivePath('STOCK'); setWizard('FABRIC'); }} className="w-full p-6 bg-white border border-rose-50 rounded-[2rem] shadow-sm flex flex-col items-center gap-1 group transition-all hover:shadow-md">
+      <div className="w-full max-w-xs space-y-4 mt-12">
+        <button onClick={() => { setActivePath('STOCK'); setWizard('FABRIC'); }} className="w-full p-5 bg-white border border-rose-50 rounded-[2rem] shadow-sm flex flex-col items-center gap-1 group transition-all hover:shadow-md active:scale-95">
           <span className="text-xs font-black uppercase text-gray-800 tracking-widest">Portfolio Synthesis</span>
           <span className="text-[8px] text-rose-300 uppercase mono">Fast Mode • Stock Models</span>
         </button>
-        <button onClick={() => { setActivePath('PERSONAL'); setWizard('CAPTURE'); }} className="w-full p-6 bg-[#FF3366] rounded-[2rem] text-white font-black uppercase tracking-widest shadow-xl active:scale-95 transition-all flex flex-col items-center gap-1">
+        <button onClick={() => { setActivePath('PERSONAL'); setWizard('CAPTURE'); }} className="w-full p-5 bg-[#FF3366] rounded-[2rem] text-white font-black uppercase tracking-widest shadow-xl active:scale-95 transition-all flex flex-col items-center gap-1">
           <span>Private Atelier</span>
           <span className="text-[8px] opacity-70 uppercase mono">Deep Mapping Mode</span>
         </button>
@@ -400,13 +433,11 @@ const App = () => {
               <button key={g} onClick={() => { setTrayExpanded(false); handleAlter(`Switch model to ${g}`); }} className="px-6 py-2 text-gray-400 text-[9px] font-bold hover:text-[#FF3366] uppercase tracking-widest text-left">{g}</button>
             ))}
           </div>
-          <div className="flex bg-white/80 backdrop-blur-xl p-1 rounded-full border border-white/50 shadow-xl">
-            <button onClick={undo} disabled={state.past.length === 0 || state.isProcessing} className="w-10 h-10 flex items-center justify-center text-[#FF3366] disabled:opacity-20 hover:bg-rose-50 rounded-full transition-all">↺</button>
-          </div>
+          <button onClick={undo} disabled={state.past.length === 0 || state.isProcessing} className="w-10 h-10 flex items-center justify-center text-[#FF3366] bg-white/80 backdrop-blur-xl border border-white/50 shadow-xl rounded-full">↺</button>
         </div>
       </main>
 
-      <footer className="h-48 bg-white border-t border-rose-50 p-6 flex flex-col gap-2 shadow-[0_-10px_40px_rgba(0,0,0,0.02)]">
+      <footer className="h-44 bg-white border-t border-rose-50 p-6 flex flex-col gap-2 shadow-[0_-10px_40px_rgba(0,0,0,0.02)]">
         <div className="flex-1 overflow-y-auto no-scrollbar space-y-2">
           {state.history.slice(-5).map((m, i) => (
             <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -429,7 +460,6 @@ const App = () => {
               }
             }} 
           />
-          <div className="absolute right-4 w-1 h-1 bg-[#FF3366] rounded-full animate-ping"></div>
         </div>
       </footer>
 
@@ -443,11 +473,8 @@ const App = () => {
       {wizard === 'FABRIC' && (
         <div className="fixed inset-0 z-[140] bg-black/60 backdrop-blur-xl flex flex-col items-center justify-center p-8">
           <div className="bg-white rounded-[3rem] p-12 flex flex-col items-center gap-8 shadow-2xl animate-in zoom-in duration-300">
-            <div className="text-center">
-              <h2 className="text-lg font-black uppercase text-gray-800 tracking-widest serif">Upload Material</h2>
-              <p className="text-[9px] mono text-rose-300 uppercase mt-1">Source Textile for Mapping</p>
-            </div>
-            <div className="w-36 h-36 bg-rose-50 rounded-full flex items-center justify-center relative shadow-inner overflow-hidden border-4 border-white scale-110">
+            <h2 className="text-lg font-black uppercase text-gray-800 tracking-widest serif">Upload Material</h2>
+            <div className="w-36 h-36 bg-rose-50 rounded-full flex items-center justify-center relative shadow-inner border-4 border-white scale-110">
                <FabricUploader onUpload={handleUpload} isLoading={false} />
             </div>
             <button onClick={() => setWizard('HOME')} className="text-[10px] uppercase text-gray-400 font-bold tracking-widest">Cancel Session</button>
@@ -455,15 +482,6 @@ const App = () => {
         </div>
       )}
       
-      {wizard === 'CLIENT' && (
-        <ClientForm 
-          onSubmit={startDesign} 
-          onSkip={() => startDesign()} 
-          initialMode={activePath === 'PERSONAL' ? 'Personal' : 'Stock'} 
-        />
-      )}
-      
-      {inspectOpen && state.fabric && <FabricInspector image={state.fabric.image} onClose={() => setInspectOpen(false)} />}
       <style>{`@keyframes scan { 0% { top: -5%; } 100% { top: 105%; } }`}</style>
     </div>
   );

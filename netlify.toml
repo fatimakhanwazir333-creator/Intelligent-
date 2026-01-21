@@ -1,6 +1,6 @@
 [build]
   publish = "."
-  command = "echo 'Atelier Synthesis: Static build successful.'"
+  command = "echo 'Atelier Synthesis: No build step required for browser-transpiled environment.'"
 
 [[headers]]
   for = "/*"
@@ -8,5 +8,5 @@
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "camera=*, microphone=(), geolocation=()"
+    Permissions-Policy = "camera=(self), microphone=(), geolocation=()"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"

@@ -19,6 +19,18 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <script>
+      // Shim for process.env to prevent ReferenceErrors in the browser
+      // Netlify's environment variables are typically injected into the window object 
+      // or handled via a build plugin. This ensures the app doesn't crash on load.
+      window.process = {
+        env: {
+          API_KEY: "" // Will be populated by the platform or should be accessed via process.env.API_KEY
+        }
+      };
+    </script>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=JetBrains+Mono:wght@500&family=Great+Vibes&display=swap" rel="stylesheet">
     <style>
         :root {

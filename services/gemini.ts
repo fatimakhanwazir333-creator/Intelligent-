@@ -1,3 +1,4 @@
+
 import { GoogleGenAI } from "@google/genai";
 import { ModelType, GarmentConfig, Gender, GroundingSource } from "../types";
 import { SYSTEM_PROMPT } from "../constants";
@@ -8,20 +9,20 @@ import { SYSTEM_PROMPT } from "../constants";
  * the most up-to-date environment variables (like API_KEY) are utilized.
  * This is especially important for serverless or edge-based deployments like Netlify.
  */
-const getAIClient = () => new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+// Use named parameter and direct access to process.env.API_KEY as per guidelines.
+const getAIClient = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const analyzeFabric = async (fabricBase64: string): Promise<string> => {
   const ai = getAIClient();
+  // Fixed: Correcting contents structure to a single Content object { parts: [...] }
   const response = await ai.models.generateContent({
     model: ModelType.GEMINI_TEXT,
-    contents: [
-      {
-        parts: [
-          { inlineData: { data: fabricBase64.split(',')[1], mimeType: 'image/jpeg' } },
-          { text: "Analyze this luxury fabric. Describe its artistic potential for haute couture in one elegant sentence." }
-        ]
-      }
-    ]
+    contents: {
+      parts: [
+        { inlineData: { data: fabricBase64.split(',')[1], mimeType: 'image/jpeg' } },
+        { text: "Analyze this luxury fabric. Describe its artistic potential for haute couture in one elegant sentence." }
+      ]
+    }
   });
   return response.text || "Material essence captured by Arslan Wazir.";
 };

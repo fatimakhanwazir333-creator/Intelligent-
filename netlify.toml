@@ -1,6 +1,6 @@
 [build]
   publish = "."
-  command = "echo 'Atelier Synthesis: No build step required for browser-transpiled environment.'"
+  command = "echo 'Atelier Synthesis: Build skipped - using browser-side transpilation.'"
 
 [[headers]]
   for = "/*"
@@ -9,4 +9,13 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(self), microphone=(), geolocation=()"
-    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+
+[[headers]]
+  for = "*.tsx"
+  [headers.values]
+    Content-Type = "application/javascript"
+
+[[headers]]
+  for = "*.ts"
+  [headers.values]
+    Content-Type = "application/javascript"

@@ -1,0 +1,7 @@
+{
+  "name": "Atelier AI: Advanced Fashion Engineering",
+  "description": "A high-end virtual fashion studio that maps unstitched fabric onto models and allows real-time silhouette alterations using generative AI.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

@@ -1,11 +1,17 @@
-
-import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
-import { ModelType, FabricData, GarmentConfig, Gender, GroundingSource } from "../types";
+import { GoogleGenAI } from "@google/genai";
+import { ModelType, GarmentConfig, Gender, GroundingSource } from "../types";
 import { SYSTEM_PROMPT } from "../constants";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+/**
+ * Creates a fresh instance of the Google GenAI client.
+ * Adheres to the requirement of initializing right before API calls to ensure
+ * the most up-to-date environment variables (like API_KEY) are utilized.
+ * This is especially important for serverless or edge-based deployments like Netlify.
+ */
+const getAIClient = () => new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
 
 export const analyzeFabric = async (fabricBase64: string): Promise<string> => {
+  const ai = getAIClient();
   const response = await ai.models.generateContent({
     model: ModelType.GEMINI_TEXT,
     contents: [
@@ -25,6 +31,7 @@ export const updateDesignLogic = async (
   currentConfig: GarmentConfig, 
   chatHistory: { role: string, content: string }[]
 ): Promise<{ updatedConfig: GarmentConfig; message: string; sources?: GroundingSource[] }> => {
+  const ai = getAIClient();
   const historyParts = chatHistory.map(h => `${h.role === 'user' ? 'Client' : 'Arslan Wazir'}: ${h.content}`).join('\n');
   
   const prompt = `
@@ -41,7 +48,7 @@ export const updateDesignLogic = async (
   `;
 
   const response = await ai.models.generateContent({
-    model: 'gemini-3-pro-preview', // Using Pro for better state tracking
+    model: 'gemini-3-pro-preview',
     contents: prompt,
     config: { 
       tools: [{ googleSearch: {} }],
@@ -72,7 +79,6 @@ export const updateDesignLogic = async (
     else if (modelVal === 'child') modelType = 'Child';
     else if (modelVal === 'personal') modelType = 'Personal';
 
-    // Merge logic: ensure we don't lose modifications if AI returns a partial set
     const finalConfig: GarmentConfig = {
       kernel_state: 'ACTIVE',
       render_profile: {
@@ -96,6 +102,7 @@ export const renderGarment = async (
   fabricBase64: string, 
   config: GarmentConfig
 ): Promise<string> => {
+  const ai = getAIClient();
   const profile = config.render_profile;
   const mods = profile.modifications;
   
@@ -115,7 +122,6 @@ export const renderGarment = async (
     
     contents = { parts: [fabricPart, personPart, promptPart] };
   } else {
-    // For stock models, we need to be extremely descriptive to keep the design consistent
     const fabricPrompt = `A high-fashion editorial, full-body portrait of a ${profile.model} model.
     STYLE: An avant-garde couture masterpiece featuring a ${mods.fit}.
     SPECIFICS: ${mods.sleeves} sleeves, with ${mods.pockets} designer pockets integrated into the seams.

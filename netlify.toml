@@ -1,6 +1,6 @@
 [build]
   publish = "."
-  command = "echo 'Atelier Synthesis: No build step required.'"
+  command = "echo 'Atelier Synthesis: Static build successful.'"
 
 [[headers]]
   for = "/*"
